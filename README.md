@@ -1,68 +1,41 @@
-Symfony Standard Edition
-========================
+The project
+===========
 
-Welcome to the Symfony Standard Edition - a fully-functional Symfony
-application that you can use as the skeleton for your new applications.
+Create a one-page web application which uses a public API as its data source, and which does some sort of graphical representation thereof.
 
-For details on how to download and get started with Symfony, see the
-[Installation][1] chapter of the Symfony Documentation.
+In this case, I chose to use Google's geolocation / place lookup services as the public API, and I used d3js to create a graphical display of the data looked up.
 
-What's inside?
---------------
+Bar Crawl
+---------
 
-The Symfony Standard Edition is configured with the following defaults:
+I took one of the suggested ideas, "list nearby bars". I decided I wanted to modulate on the theme just a little, so I turned it into a "bar crawl".
+Bar locations found in the search area would be drawn on an SVG element (representing the map) in a sequence, suggesting an order in which to visit them, in a purported night of drunken revelry (unrealistically, I have the default maximum set to 20, which is of course a ridiculous number if one is to imbibe *anything* at each establishment).
+The idea is you type in your zip code, hit a button, and watch the bar crawl sequence appear before your eyes.
 
-  * An AppBundle you can use to start coding;
+What it entails
+---------------
 
-  * Twig as the only configured template engine;
+#The data
+Clearly, we need a way to access this data. I wrote this project in Symfony, and it was pretty simple to make a very thin Controller on top of a data model, to provide access to a list of bars as JSON. This was implemented in `BarServiceController`. And yes, I'm aware that there are slightly more standard ways of creating thin Controllers over Models with more advanced features bundled in, but I chose not to delve into those, as this was intended to be a simple project, and this was all I needed for now. More to learn later, I'm sure.
+The model started off with a simple mock, since I wanted to shore up the main page's controller and template, to have something functional to look at, before delving into Google's APIs. I made a `Coordinate` class just to be a POPO (plain-old PHP Object), and then `CoordinateFaker` to give us random generators of `Coordinate`s. The `BarServiceController` is a thin controller on top of a CoordinateFaker.
+The `GeoCoder` and `PlaceSearcher` classes are simple implementations of fetching "services" of Google's APIs for translating something that looks like an address or place description into a LatLon coordinate, and for finding places of a certain type within a certain radius of a given LatLon coordinate.
+I used the dependency-injection framework built into Symfony to automatically construct new instances of these services on demand, passing in the Google API key which is required.
 
-  * Doctrine ORM/DBAL;
+#note
+The app/config/services.yml file must be edited to put in your Google API key if you actually want to run this with live data (or otherwise, your lookups based on zip code will fail).
 
-  * Swiftmailer;
+#The page
+The page is... well, a simple HTML template in twig, along with a .js file pertinent. It has a div where the SVG gets rendered. It uses d3.js to render a SVG object.
+I will bet there are js libraries out there which are great at animation, but I ended up "hacking" together an animation that involves a recursive function which takes coordinates pairwise and draws a circle and line, and then schedules the next recursive invocation (down to a base-case).
+Clearly there's a lot for me to learn on the front-end.
+I ended up giving up on "good" SVG display, after struggling with golocation data normalization for some time.
 
-  * Annotations enabled for everything.
+#note
+The requirement stated "one-page". This implementation is clearly not one-page, unless you count "one page that is rendered to the user", and discount the "bars" service as a separate page.
 
-It comes pre-configured with the following bundles:
-
-  * **FrameworkBundle** - The core Symfony framework bundle
-
-  * [**SensioFrameworkExtraBundle**][6] - Adds several enhancements, including
-    template and routing annotation capability
-
-  * [**DoctrineBundle**][7] - Adds support for the Doctrine ORM
-
-  * [**TwigBundle**][8] - Adds support for the Twig templating engine
-
-  * [**SecurityBundle**][9] - Adds security by integrating Symfony's security
-    component
-
-  * [**SwiftmailerBundle**][10] - Adds support for Swiftmailer, a library for
-    sending emails
-
-  * [**MonologBundle**][11] - Adds support for Monolog, a logging library
-
-  * **WebProfilerBundle** (in dev/test env) - Adds profiling functionality and
-    the web debug toolbar
-
-  * **SensioDistributionBundle** (in dev/test env) - Adds functionality for
-    configuring and working with Symfony distributions
-
-  * [**SensioGeneratorBundle**][13] (in dev/test env) - Adds code generation
-    capabilities
-
-  * **DebugBundle** (in dev/test env) - Adds Debug and VarDumper component
-    integration
-
-All libraries and bundles included in the Symfony Standard Edition are
-released under the MIT or BSD license.
-
-Enjoy!
-
-[1]:  https://symfony.com/doc/3.0/book/installation.html
-[6]:  https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html
-[7]:  https://symfony.com/doc/3.0/book/doctrine.html
-[8]:  https://symfony.com/doc/3.0/book/templating.html
-[9]:  https://symfony.com/doc/3.0/book/security.html
-[10]: https://symfony.com/doc/3.0/cookbook/email.html
-[11]: https://symfony.com/doc/3.0/cookbook/logging/monolog.html
-[13]: https://symfony.com/doc/3.0/bundles/SensioGeneratorBundle/index.html
+Future learning
+---------------
+- Get better at transformation and display of geolocation information
+- make use of standard input validation libraries
+- do all the fetching and transitioning inside of html5/js rather than requiring a backend
+- - (Beyond the fact that my current understanding tells me Google's APIs aren't available cross-domain and hence would require a key which I'd want to hide behind a service, it's more lightweight design to not require a backend)

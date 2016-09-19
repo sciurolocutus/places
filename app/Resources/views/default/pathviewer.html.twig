@@ -9,6 +9,7 @@
         <div id="container">
             <div id="welcome">
                 <h1>Welcome to the Bar Crawl Suggestor!</h1>
+                <h2>Crawl around these bars this way!</h2>
             </div>
 
             <div id="status">
@@ -18,8 +19,7 @@
             </div>
 
             <div id="barCrawl">
-                <h2>Crawl around these bars in this fashion!</h2>
-				<script>var bars = {{ barData["Stumpy's"].x }} ; setTimeout(function() {
+				<script>setTimeout(function() {
 						//drawMySVG('#barCrawl', fakeSVGData());
 						drawDynamicSVGData('#barCrawl', '/bars?n=20&x=200&y=100&r=100');
 						/*
@@ -32,10 +32,17 @@
 					)
 					*/
 				}, 1000); </script>
-                <p>
-				Bars: {{ bars }}
-                </p>
             </div>
+			<div id="tryAgain">
+				<form id="zipForm">
+					<input type="text" pattern="/^[0-9]{5}$/" name="zip" id="zip"></input>
+				</form>
+				<button id="submitZip" onclick="submitZipForm()">Look up bars</button>
+				<!-- <button id="findme">Find bars near me!</button> -->
+				<script>addZipValidator('#zip');
+				</script>
+
+			</div>
 
         </div>
     </div>

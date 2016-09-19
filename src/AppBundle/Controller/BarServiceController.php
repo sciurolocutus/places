@@ -32,7 +32,6 @@ class BarServiceController extends Controller
 		if(!isset($n) || !is_numeric($n) || intval($n, 10) > 20 || intval($n, 10) < 0) {
 			$n = 5;
 		}
-		
 
 		//Step 1: pull some bar locations
 		// For now, we will fake these.
